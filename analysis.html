@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>매출 분석 | 홈앤쇼핑 포탈</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    #current-time {
+      font-size: 11px;
+      opacity: 0.85;
+      font-weight: 400;
+      letter-spacing: -0.12px;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <!-- Global Nav (Header) -->
+  <header class="header">
+    <h1>홈앤쇼핑 포탈</h1>
+    <div id="current-time"></div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <!-- Back Button -->
+    <div style="padding: var(--space-lg); padding-bottom: 0;">
+      <a href="index.html" class="btn" style="font-size: 14px;">← 메인으로</a>
+    </div>
+
+    <!-- Daily Sales -->
+    <section class="card" style="margin: var(--space-lg);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h2 style="margin: 0;">일별 실적 (최근 7일)</h2>
+        <span style="font-size: 12px; color: var(--text-light);">(단위: 백만원)</span>
+      </div>
+      <table id="daily-table">
+        <thead>
+          <tr>
+            <th>날짜</th>
+            <th>2026년</th>
+            <th>2025년</th>
+            <th>전년대비</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Phase 3에서 동적 렌더링 -->
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Monthly Sales -->
+    <section class="card" style="margin: var(--space-lg);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h2 style="margin: 0;">월별 실적 & 목표</h2>
+        <span style="font-size: 12px; color: var(--text-light);">(단위: 백만원)</span>
+      </div>
+      <div id="monthly-summary" style="margin-bottom: 20px;">
+        <!-- Phase 3에서 동적 렌더링 -->
+      </div>
+      <table id="monthly-table">
+        <thead>
+          <tr>
+            <th>월</th>
+            <th>2026년</th>
+            <th>2025년</th>
+            <th>목표액</th>
+            <th>달성률</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Phase 3에서 동적 렌더링 -->
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Yearly Goal -->
+    <section class="card" style="margin: var(--space-lg);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h2 style="margin: 0;">년도 목표 현황</h2>
+        <span style="font-size: 12px; color: var(--text-light);">(단위: 백만원)</span>
+      </div>
+      <div id="yearly-summary">
+        <!-- Phase 3에서 동적 렌더링 -->
+      </div>
+    </section>
+
+    <!-- 주문 매체별 분석 -->
+    <section class="card" style="margin: var(--space-lg);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h2 style="margin: 0;">📱 주문 매체별 분석</h2>
+        <span style="font-size: 12px; color: var(--text-light);">(단위: 백만원)</span>
+      </div>
+      <table id="channel-table">
+        <thead>
+          <tr>
+            <th>날짜</th>
+            <th style="color: #FF6B00;">TV</th>
+            <th style="color: #007AFF;">Mobile</th>
+            <th>합계</th>
+            <th>TV 비율</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 매체별 데이터 렌더링 -->
+        </tbody>
+      </table>
+    </section>
+
+  </main>
+
+  <!-- 푸터 -->
+  <footer class="footer">
+    <p>&copy; 2026 홈앤쇼핑 · 내부 포탈</p>
+  </footer>
+
+  <!-- Supabase JS 라이브러리 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script src="js/constants.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/sales-analytics.js"></script>
+  <script src="js/app.js"></script>
+
+  <script>
+    // analysis.html 초기화
+    document.addEventListener('DOMContentLoaded', async function() {
+      console.log('Analysis 페이지 로드됨');
+
+      // 현재 시간 업데이트
+      if (typeof updateCurrentTime === 'function') {
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 1000);
+      }
+
+      // Supabase 초기화
+      const connected = await initSupabase();
+
+      if (connected) {
+        console.log('✓ Supabase 데이터 로드 시작');
+
+        // 데이터 로드
+        const dailyData = await getDailySales();
+        const previousYearData = await getPreviousYearDailySales();
+        const monthlyData = await getMonthlySales();
+        const previousYearMonthlyData = await getPreviousYearMonthlySales();
+        const channelData = await getDailySalesByChannel();
+        const goalsData = await getYearlyGoals();
+
+        // 데이터가 있으면 렌더링
+        if (dailyData && dailyData.length > 0) {
+          renderDailyTableFromSupabase(dailyData, previousYearData);
+        } else {
+          console.warn('일별 데이터가 없습니다.');
+        }
+
+        if (monthlyData && monthlyData.length > 0) {
+          renderMonthlyTableFromSupabase(monthlyData, previousYearMonthlyData, goalsData);
+        } else {
+          console.warn('월별 데이터가 없습니다.');
+        }
+
+        if (goalsData) {
+          renderYearlySummaryFromSupabase(goalsData);
+        }
+
+        // 매체별 분석 렌더링
+        if (channelData && channelData.length > 0) {
+          renderChannelAnalysis(channelData);
+        } else {
+          console.warn('매체별 매출 데이터가 없습니다.');
+        }
+      } else {
+        showSupabaseSetupPrompt();
+      }
+
+    });
+
+    // Supabase 데이터로 일별 테이블 렌더링 (전년도 비교)
+    function renderDailyTableFromSupabase(data, previousYearData) {
+      const tbody = document.querySelector('#daily-table tbody');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+
+      console.log('=== 일별 실적 렌더링 시작 ===');
+      console.log('2026년 데이터:', data?.length || 0, '개');
+      console.log('2025년 데이터:', previousYearData?.length || 0, '개');
+
+      // 2026년 데이터를 날짜별로 그룹화 (TV+쇼핑몰 합산)
+      const currentYearMap = {};
+      if (data && data.length > 0) {
+        data.forEach(item => {
+          const date = item.sale_date;
+          if (!currentYearMap[date]) {
+            currentYearMap[date] = 0;
+          }
+          currentYearMap[date] += item.sales_amount;
+        });
+      }
+
+      console.log('2026년 그룹화 완료:', Object.keys(currentYearMap).length, '날짜');
+
+      // 2025년 데이터를 날짜별로 그룹화 (TV+쇼핑몰 합산)
+      const prevYearMap = {};
+      if (previousYearData && previousYearData.length > 0) {
+        previousYearData.forEach(item => {
+          const date = item.sale_date;
+          if (!prevYearMap[date]) {
+            prevYearMap[date] = 0;
+          }
+          prevYearMap[date] += item.sales_amount;
+        });
+      }
+
+      console.log('2025년 그룹화 완료:', Object.keys(prevYearMap).length, '날짜');
+
+      // 정렬된 날짜로 테이블 작성 (최신순) - 최근 7일
+      const sortedDates = Object.keys(currentYearMap)
+        .sort()
+        .reverse()
+        .slice(0, 7);
+
+      console.log('표시할 날짜:', sortedDates);
+
+      if (sortedDates.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">데이터 로드 중...</td></tr>';
+        return;
+      }
+
+      sortedDates.forEach(date => {
+        const row = document.createElement('tr');
+        const currentYearSales = currentYearMap[date] || 0;
+        const previousYearSales = prevYearMap[date] || 0;
+
+        // 2025년 대비 2026년 증감률 계산
+        let yoYGrowth = 0;
+        let yoYColor = '';
+        let yoYSign = '';
+
+        if (previousYearSales > 0) {
+          yoYGrowth = ((currentYearSales - previousYearSales) / previousYearSales * 100).toFixed(1);
+          yoYColor = yoYGrowth > 0 ? 'text-success' : (yoYGrowth < 0 ? 'text-danger' : '');
+          yoYSign = yoYGrowth > 0 ? '+' : '';
+        }
+
+        console.log(`${date}: 2026=${currentYearSales}, 2025=${previousYearSales}, YoY=${yoYGrowth}%`);
+
+        row.innerHTML = `
+          <td>${date}</td>
+          <td><strong>${formatCurrency(currentYearSales)}</strong></td>
+          <td><strong>${formatCurrency(previousYearSales)}</strong></td>
+          <td class="${yoYColor}"><strong>${previousYearSales > 0 ? yoYSign + yoYGrowth + '%' : '-'}</strong></td>
+        `;
+
+        tbody.appendChild(row);
+      });
+    }
+
+    // Supabase 데이터로 월별 테이블 렌더링 (전년도 비교)
+    function renderMonthlyTableFromSupabase(data, previousYearData, goalsData) {
+      const tbody = document.querySelector('#monthly-table tbody');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+
+      // 전년도 데이터를 월별 맵으로 변환 (sale_year + sale_month)
+      const prevYearMap = {};
+      if (previousYearData && previousYearData.length > 0) {
+        previousYearData.forEach(item => {
+          const monthKey = `${item.sale_year}-${item.sale_month}`;
+          prevYearMap[monthKey] = item.sales_amount;
+        });
+      }
+
+      // 현재 데이터 정렬 (월순)
+      if (data && data.length > 0) {
+        data.sort((a, b) => b.sale_month - a.sale_month);
+
+        data.forEach(item => {
+          const row = document.createElement('tr');
+          const sales = item.sales_amount || 0;
+          const goal = item.goal_amount || 0;
+          const achievement = goal > 0 ? calculateAchievement(sales, goal) : item.achievement_rate || 0;
+
+          // 전년도 매출 조회
+          const monthKey = `${item.sale_year - 1}-${item.sale_month}`;
+          const previousYearSales = prevYearMap[monthKey] || 0;
+
+          const achievementColor = achievement >= 100 ? 'text-success' : (achievement >= 80 ? 'text-warning' : 'text-danger');
+
+          // 월 표시 (예: 2026년 6월)
+          const monthStr = `${item.sale_year}년 ${item.sale_month}월`;
+
+          row.innerHTML = `
+            <td>${monthStr}</td>
+            <td><strong>${formatCurrency(sales)}</strong></td>
+            <td>${formatCurrency(previousYearSales)}</td>
+            <td>${formatCurrency(goal)}</td>
+            <td class="${achievementColor}"><strong>${achievement}%</strong></td>
+          `;
+
+          tbody.appendChild(row);
+        });
+      }
+    }
+
+    // Supabase 데이터로 년도 요약 렌더링 (yearly_goals 테이블용)
+    function renderYearlySummaryFromSupabase(goalsData) {
+      const summaryDiv = document.getElementById('yearly-summary');
+      if (!summaryDiv) return;
+
+      const yearlyGoal = goalsData.yearly_goal_amount || 360000000000;
+      const accumulated = goalsData.yearly_accumulated_amount || 0;
+      const monthsRemaining = 6; // 6월 11일 현재, 남은 개월수
+      const achievement = calculateAchievement(accumulated, yearlyGoal);
+      const requiredMonthly = calculateRequiredMonthlyAverage(yearlyGoal, accumulated, monthsRemaining);
+
+      const html = `
+        <div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div>
+              <p style="color: var(--text-light); font-size: 13px; margin-bottom: 5px;">년도 목표</p>
+              <p style="font-size: 20px; font-weight: 600; color: var(--primary);">${formatCurrency(yearlyGoal)}</p>
+            </div>
+            <div>
+              <p style="color: var(--text-light); font-size: 13px; margin-bottom: 5px;">현재까지 누적</p>
+              <p style="font-size: 20px; font-weight: 600; color: var(--success);">${formatCurrency(accumulated)}</p>
+            </div>
+          </div>
+          <div style="margin-bottom: 20px;">
+            <p style="color: var(--text-light); font-size: 13px; margin-bottom: 8px;">달성률: ${achievement}%</p>
+            <div class="progress">
+              <div class="progress-bar" style="width: ${Math.min(achievement, 100)}%;">
+                ${achievement}%
+              </div>
+            </div>
+          </div>
+          <div style="padding: 15px; background-color: var(--bg-light); border-radius: 8px;">
+            <p style="color: var(--text-light); font-size: 13px; margin-bottom: 8px;">남은 기간(6개월) 필요 월평균</p>
+            <p style="font-size: 18px; font-weight: 600; color: var(--primary);">${formatCurrency(requiredMonthly)}</p>
+          </div>
+        </div>
+      `;
+
+      summaryDiv.innerHTML = html;
+    }
+
+    // Supabase 설정 프롬프트
+    function showSupabaseSetupPrompt() {
+      const responseDiv = document.querySelector('.card');
+      if (responseDiv) {
+        responseDiv.innerHTML = `
+          <div style="padding: 20px; background-color: var(--bg-light); border-radius: 8px; text-align: center;">
+            <h3 style="color: var(--primary); margin-bottom: 10px;">⚠️ Supabase 설정 필요</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+              데이터를 표시하려면 Supabase 설정이 필요합니다.
+            </p>
+            <button class="btn" onclick="promptSupabaseSetup()">Supabase 설정하기</button>
+          </div>
+        `;
+      }
+    }
+
+    // 주문 매체별 분석 렌더링
+    function renderChannelAnalysis(data) {
+      const tbody = document.querySelector('#channel-table tbody');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+
+      // 날짜별로 데이터 그룹화
+      const dateMap = {};
+      data.forEach(item => {
+        const date = item.sale_date;
+        if (!dateMap[date]) {
+          dateMap[date] = { TV: 0, Mobile: 0 };
+        }
+        dateMap[date][item.order_channel] = item.sales_amount;
+      });
+
+      // 날짜순 정렬 (최신순)
+      const sortedDates = Object.keys(dateMap).sort().reverse().slice(0, 7);
+
+      sortedDates.forEach(date => {
+        const channelData = dateMap[date];
+        const tvSales = channelData.TV || 0;
+        const mobileSales = channelData.Mobile || 0;
+        const totalSales = tvSales + mobileSales;
+        const tvRatio = totalSales > 0 ? ((tvSales / totalSales) * 100).toFixed(1) : 0;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${date}</td>
+          <td style="color: #FF6B00;"><strong>${formatCurrency(tvSales)}</strong></td>
+          <td style="color: #007AFF;"><strong>${formatCurrency(mobileSales)}</strong></td>
+          <td><strong>${formatCurrency(totalSales)}</strong></td>
+          <td>${tvRatio}%</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // Supabase 설정 입력 프롬프트
+    function promptSupabaseSetup() {
+      const url = prompt('Supabase Project URL을 입력하세요:\n(예: https://xxxxx.supabase.co)');
+      if (!url) return;
+
+      const key = prompt('Supabase API Key를 입력하세요:\n(anon public key)');
+      if (!key) return;
+
+      if (setSupabaseConfig(url, key)) {
+        alert('✓ Supabase 설정이 저장되었습니다. 페이지를 새로고침하세요.');
+        location.reload();
+      } else {
+        alert('❌ Supabase 라이브러리를 로드할 수 없습니다.');
+      }
+    }
+  </script>
+</body>
+</html>

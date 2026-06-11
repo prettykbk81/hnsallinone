@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>설정 | 홈앤쇼핑 포탈</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    #current-time {
+      font-size: 11px;
+      opacity: 0.85;
+      font-weight: 400;
+      letter-spacing: -0.12px;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <!-- Global Nav (Header) -->
+  <header class="header">
+    <h1>홈앤쇼핑 포탈</h1>
+    <div id="current-time"></div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <!-- Back Button -->
+    <div style="padding: var(--space-lg); padding-bottom: 0;">
+      <a href="index.html" class="btn" style="font-size: 14px;">← 메인으로</a>
+    </div>
+
+    <!-- User Profile -->
+    <section class="card" style="margin: var(--space-lg);">
+      <h2>👤 사용자 프로필</h2>
+      <div style="margin-top: 15px;">
+        <label style="display: block; margin-bottom: 10px; font-weight: 500;">이름</label>
+        <input type="text" id="user-name" placeholder="사용자 이름" style="margin-bottom: 20px;">
+
+        <label style="display: block; margin-bottom: 10px; font-weight: 500;">부서</label>
+        <input type="text" id="user-department" placeholder="예: 영업팀" style="margin-bottom: 20px;">
+
+        <label style="display: block; margin-bottom: 10px; font-weight: 500;">직급</label>
+        <input type="text" id="user-position" placeholder="예: 과장" style="margin-bottom: 20px;">
+
+        <button class="btn btn-primary" onclick="saveUserProfile()" style="margin-right: 10px;">저장</button>
+      </div>
+    </section>
+
+    <!-- Goal Settings -->
+    <section class="card" style="margin: var(--space-lg);">
+      <h2>🎯 목표 설정</h2>
+      <div style="margin-top: 15px;">
+        <label style="display: block; margin-bottom: 10px; font-weight: 500;">월 목표액 (원)</label>
+        <input type="number" id="settings-monthly-goal" placeholder="예: 150000000" style="margin-bottom: 20px;">
+
+        <label style="display: block; margin-bottom: 10px; font-weight: 500;">년도 목표액 (원)</label>
+        <input type="number" id="settings-yearly-goal" placeholder="예: 15000000000" style="margin-bottom: 20px;">
+
+        <button class="btn btn-primary" onclick="saveSettingsGoals()" style="margin-right: 10px;">저장</button>
+      </div>
+    </section>
+
+    <!-- Data Management -->
+    <section class="card" style="margin: var(--space-lg);">
+      <h2>💾 데이터 관리</h2>
+      <div style="margin-top: 15px;">
+        <button class="btn" onclick="clearLocalStorage()" style="background-color: #FF2B2B; margin-right: 10px;">전체 데이터 삭제</button>
+        <p style="margin-top: 15px; color: var(--text-light); font-size: 13px;">
+          주의: 이 작업은 저장된 모든 설정과 목표를 삭제합니다. 되돌릴 수 없습니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- Info -->
+    <section class="card" style="margin: var(--space-lg);">
+      <h2>ℹ️ 정보</h2>
+      <div style="margin-top: 15px; font-size: 14px;">
+        <p style="margin-bottom: 10px;">
+          <strong>앱 버전:</strong> 1.0.0 (MVP)
+        </p>
+        <p style="margin-bottom: 10px;">
+          <strong>마지막 업데이트:</strong> 2026년 6월 11일
+        </p>
+        <p style="margin-bottom: 10px;">
+          <strong>개발팀:</strong> 홈앤쇼핑 통합 포탈 팀
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- 푸터 -->
+  <footer class="footer">
+    <p>&copy; 2026 홈앤쇼핑 · 내부 포탈</p>
+  </footer>
+
+  <script src="js/constants.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    function clearLocalStorage() {
+      if (confirm('정말 모든 데이터를 삭제하시겠습니까?')) {
+        localStorage.clear();
+        alert('데이터가 삭제되었습니다.');
+        location.reload();
+      }
+    }
+  </script>
+</body>
+</html>
